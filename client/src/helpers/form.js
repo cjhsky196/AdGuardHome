@@ -1,39 +1,47 @@
 import React, { Fragment } from 'react';
 import { Trans } from 'react-i18next';
-
+import PropTypes from 'prop-types';
 import { R_IPV4, R_MAC, R_HOST, R_IPV6, R_CIDR, UNSAFE_PORTS } from '../helpers/constants';
 
+export const renderTextarea = (props) => {
+    const {
+        input, id, placeholder, type, className, disabled, autoComplete,
+    } = props;
+    return (<textarea
+        {...input}
+        id={id}
+        placeholder={placeholder}
+        type={type}
+        className={className}
+        disabled={disabled}
+        autoComplete={autoComplete}
+    />);
+};
+
+export const renderInput = (props) => {
+    const {
+        input, id, placeholder, type, className, disabled, autoComplete,
+    } = props;
+    return (<input
+        {...input}
+        id={id}
+        placeholder={placeholder}
+        type={type}
+        className={className}
+        disabled={disabled}
+        autoComplete={autoComplete}
+    />);
+};
+
 export const renderField = ({
-    // eslint-disable-next-line react/prop-types
     input, id, className, placeholder, type, disabled,
-    // eslint-disable-next-line react/prop-types
     autoComplete, textarea, meta: { touched, error },
 }) => {
-    function renderTextarea() {
-        return (<textarea
-            {...input}
-            id={id}
-            placeholder={placeholder}
-            type={type}
-            className={className}
-            disabled={disabled}
-            autoComplete={autoComplete}
-        />);
-    }
+    const props = {
+        input, id, placeholder, type, className, disabled, autoComplete,
+    };
 
-    function renderInput() {
-        return (<input
-            {...input}
-            id={id}
-            placeholder={placeholder}
-            type={type}
-            className={className}
-            disabled={disabled}
-            autoComplete={autoComplete}
-        />);
-    }
-
-    const component = textarea ? renderTextarea() : renderInput();
+    const component = textarea ? renderTextarea(props) : renderInput(props);
 
     return (
         <Fragment>
@@ -43,6 +51,18 @@ export const renderField = ({
             (error && <span className="form__message form__message--error">{error}</span>)}
         </Fragment>
     );
+};
+
+renderField.propTypes = {
+    input: PropTypes.object.isRequired,
+    id: PropTypes.string.isRequired,
+    className: PropTypes.string.isRequired,
+    placeholder: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+    disabled: PropTypes.bool,
+    autoComplete: PropTypes.bool,
+    textarea: PropTypes.bool,
+    meta: PropTypes.object.isRequired,
 };
 
 export const renderGroupField = ({
@@ -82,7 +102,6 @@ export const renderGroupField = ({
                 </span>
             }
         </div>
-
         {!disabled &&
         touched &&
         (error && <span className="form__message form__message--error">{error}</span>)}
@@ -164,8 +183,9 @@ export const renderServiceField = ({
 
 // Validation functions
 export const required = (value) => {
-    if (value || value === 0) {
-        return false;
+    const formattedValue = typeof value === 'string' ? value.trim() : value;
+    if (formattedValue || formattedValue === 0 || (formattedValue && formattedValue.length !== 0)) {
+        return undefined;
     }
     return <Trans>form_error_required</Trans>;
 };
@@ -175,6 +195,18 @@ export const ipv4 = (value) => {
         return <Trans>form_error_ip4_format</Trans>;
     }
     return false;
+};
+
+export const clientId = (value) => {
+    if (!value) {
+        return undefined;
+    }
+    const formattedValue = value ? value.trim() : value;
+    if (formattedValue && !(R_IPV4.test(formattedValue) || R_IPV6.test(formattedValue)
+        || R_MAC.test(formattedValue) || R_CIDR.test(formattedValue))) {
+        return <Trans>form_error_client_id_format</Trans>;
+    }
+    return undefined;
 };
 
 export const multilineClientId = (values) => {

@@ -24,6 +24,7 @@ const getLogsWithParamsWrapper = () => {
     };
 };
 
+// Cache clients in closure
 const getLogsWithParams = getLogsWithParamsWrapper();
 
 export const getAdditionalLogsRequest = createAction('GET_ADDITIONAL_LOGS_REQUEST');
